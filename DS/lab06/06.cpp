@@ -4,7 +4,7 @@
 
 using namespace std;
 
-const int STRING_SIZE = 30;
+const int STRING_SIZE = 32;
 
 class FamilyMember
 {
@@ -205,6 +205,7 @@ FamilyMember *FamilyTree::findPreviousMemberAddress(FamilyMember *currentMember,
 
     // 递归检查孩子
     FamilyMember *childResult = findPreviousMemberAddress(currentMember->firstChild, name);
+    
     if (childResult)
     {
         return childResult;

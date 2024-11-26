@@ -29,6 +29,9 @@ public:
         strcpy(this->examType, examType);
         this->next = nullptr;
     }
+
+    // 析构函数
+    ~Student() {}
 };
 // 学生管理类
 class StudentManager

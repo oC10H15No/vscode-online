@@ -2,16 +2,18 @@
 #include <limits>
 using namespace std;
 
-template <class T> class List;
+template <class T>
+class List;
+
 // 定义链表节点类
 template <class T>
 class ListNode {
-    friend class List<T>; // 友元类声明
+    friend class List<T>;
+    template <class>
+    friend class ListIterator;
 private:
     T data;         // 节点数据
     ListNode *next; // 指向下一个节点的指针
-
-    template <class> friend class ListIterator; // Add this line to make ListIterator a friend class
 public:
     ListNode() : next(nullptr) {}  // 默认构造函数
     ListNode(T val) : data(val), next(nullptr) {} // 带参数的构造函数
