@@ -3,9 +3,9 @@
 
 using namespace std;
 
-#define ID_LEN       10
-#define NAME_LEN     20
-#define GENDER_LEN   10
+#define ID_LEN 10
+#define NAME_LEN 20
+#define GENDER_LEN 10
 #define EXAMTYPE_LEN 30
 
 // 学生节点类
@@ -53,6 +53,21 @@ public:
         }
     }
 
+    // 检查考号是否存在
+    bool checkIDExist(const char id[]) const
+    {
+        Student *temp = head;
+        while (temp)
+        {
+            if (strcmp(temp->id, id) == 0)
+            {
+                return true;
+            }
+            temp = temp->next;
+        }
+        return false;
+    }
+
     // 添加学生
     void addStudent()
     {
@@ -92,10 +107,30 @@ public:
 
         int position;
         cout << "请输入你要插入的考生的位置：";
-        cin >> position;
+        while (true)
+        {
+            cin >> position;
+            if (cin.fail() || position <= 0)
+            {
+                cout << "无效操作，请重新输入" << endl;
+                cin.clear();
+                cin.ignore(1024, '\n');
+            }
+            else
+            {
+                break;
+            }
+        }
 
         cout << "请依次输入要插入考生的考号、姓名、性别、年龄、报考类别！" << endl;
-        cin >> id >> name >> gender >> age >> examType;
+        do
+        {
+            cin >> id >> name >> gender >> age >> examType;
+            if (checkIDExist(id))
+            {
+                cout << "考号已存在，请重新输入" << endl;
+            }
+        } while (checkIDExist(id));
 
         Student *newStudent = new Student(id, name, gender, age, examType);
 
@@ -340,7 +375,20 @@ int main()
     int numStudent;
     cout << "首先请建立考生信息系统！" << endl;
     cout << "请输入考生人数：";
-    cin >> numStudent;
+    while (true)
+    {
+        cin >> numStudent;
+        if (cin.fail() || numStudent <= 0)
+        {
+            cout << "无效操作，请重新输入" << endl;
+            cin.clear();
+            cin.ignore(1024, '\n');
+        }
+        else
+        {
+            break;
+        }
+    }
     cout << "请输入考号、姓名、性别、年龄、报考类别！" << endl;
     for (int i = 0; i < numStudent; i++)
     {
@@ -352,7 +400,20 @@ int main()
     do
     {
         cout << "请选择您要进行的操作: ";
-        cin >> input;
+        while (true)
+        {
+            cin >> input;
+            if (cin.fail() || input < '0' || input > '5')
+            {
+                cout << "无效操作，请重新输入" << endl;
+                cin.clear();
+                cin.ignore(1024, '\n');
+            }
+            else
+            {
+                break;
+            }
+        }
 
         // 判断是否退出
         if (input == 'Q' || input == 'q')
