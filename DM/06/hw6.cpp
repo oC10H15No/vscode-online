@@ -3,6 +3,8 @@
 #include <cmath>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <map>
 
 using namespace std;
 
@@ -181,33 +183,7 @@ public:
         }
         return result;
     }
-    /*
-        Matrix<T> operator*(T k) // 矩阵数乘
-        {
-            Matrix<T> result(rows, cols);
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    result.set(i, j, matrix[i][j] * k);
-                }
-            }
-            return result;
-        }
 
-        Matrix<T> operator/(T k) // 矩阵数除
-        {
-            Matrix<T> result(rows, cols);
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    result.set(i, j, matrix[i][j] / k);
-                }
-            }
-            return result;
-        }
-    */
     Matrix<T> transpose() // 矩阵转置
     {
         Matrix<T> result(cols, rows);
@@ -220,92 +196,92 @@ public:
         }
         return result;
     }
-    
-        T det() // 矩阵行列式
+
+    T det() // 矩阵行列式
+    {
+        if (rows != cols)
         {
-            if (rows != cols)
+            cout << "Error: Matrix is not square." << endl;
+            return 0;
+        }
+        if (rows == 1)
+        {
+            return matrix[0][0];
+        }
+        if (rows == 2)
+        {
+            return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+        }
+        T result = 0;
+        for (int i = 0; i < cols; i++)
+        {
+            Matrix<T> sub(rows - 1, cols - 1);
+            for (int j = 1; j < rows; j++)
             {
-                cout << "Error: Matrix is not square." << endl;
-                return 0;
+                for (int k = 0; k < cols; k++)
+                {
+                    if (k < i)
+                    {
+                        sub.set(j - 1, k, matrix[j][k]);
+                    }
+                    else if (k > i)
+                    {
+                        sub.set(j - 1, k - 1, matrix[j][k]);
+                    }
+                }
             }
-            if (rows == 1)
-            {
-                return matrix[0][0];
-            }
-            if (rows == 2)
-            {
-                return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
-            }
-            T result = 0;
-            for (int i = 0; i < cols; i++)
+            result += matrix[0][i] * pow(-1, i) * sub.det();
+        }
+        return result;
+    }
+
+    Matrix<T> inv() // 矩阵逆
+    {
+        if (rows != cols)
+        {
+            cout << "Error: Matrix is not square." << endl;
+            return *this;
+        }
+        T d = det();
+        if (d == 0)
+        {
+            cout << "Error: Matrix is singular." << endl;
+            return *this;
+        }
+        Matrix<T> result(rows, cols);
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
             {
                 Matrix<T> sub(rows - 1, cols - 1);
-                for (int j = 1; j < rows; j++)
+                for (int k = 0; k < rows; k++)
                 {
-                    for (int k = 0; k < cols; k++)
+                    for (int l = 0; l < cols; l++)
                     {
-                        if (k < i)
+                        if (k < i && l < j)
                         {
-                            sub.set(j - 1, k, matrix[j][k]);
+                            sub.set(k, l, matrix[k][l]);
                         }
-                        else if (k > i)
+                        else if (k < i && l > j)
                         {
-                            sub.set(j - 1, k - 1, matrix[j][k]);
+                            sub.set(k, l - 1, matrix[k][l]);
+                        }
+                        else if (k > i && l < j)
+                        {
+                            sub.set(k - 1, l, matrix[k][l]);
+                        }
+                        else if (k > i && l > j)
+                        {
+                            sub.set(k - 1, l - 1, matrix[k][l]);
                         }
                     }
                 }
-                result += matrix[0][i] * pow(-1, i) * sub.det();
+                result.set(i, j, pow(-1, i + j) * sub.det() / d);
             }
-            return result;
         }
+        return result.transpose();
+    }
 
-        Matrix<T> inv() // 矩阵逆
-        {
-            if (rows != cols)
-            {
-                cout << "Error: Matrix is not square." << endl;
-                return *this;
-            }
-            T d = det();
-            if (d == 0)
-            {
-                cout << "Error: Matrix is singular." << endl;
-                return *this;
-            }
-            Matrix<T> result(rows, cols);
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    Matrix<T> sub(rows - 1, cols - 1);
-                    for (int k = 0; k < rows; k++)
-                    {
-                        for (int l = 0; l < cols; l++)
-                        {
-                            if (k < i && l < j)
-                            {
-                                sub.set(k, l, matrix[k][l]);
-                            }
-                            else if (k < i && l > j)
-                            {
-                                sub.set(k, l - 1, matrix[k][l]);
-                            }
-                            else if (k > i && l < j)
-                            {
-                                sub.set(k - 1, l, matrix[k][l]);
-                            }
-                            else if (k > i && l > j)
-                            {
-                                sub.set(k - 1, l - 1, matrix[k][l]);
-                            }
-                        }
-                    }
-                    result.set(i, j, pow(-1, i + j) * sub.det() / d);
-                }
-            }
-            return result.transpose();
-        }
-    
     // 重载运算符 ==
     bool operator==(Matrix<T> &m)
     {
@@ -354,12 +330,6 @@ public:
             for (int i = 0; i < rows; i++)
             {
                 result.set(i, i, 1);
-                /*
-                for (int j = 0; j < cols; j++)
-                {
-                    result.set(i, j, (i == j) ? 1 : 0);
-                }
-                */
             }
             return result;
         }
@@ -454,26 +424,8 @@ bool askToContinue()
     }
 }
 
-/*
-// 自反闭包
-Matrix<bool> reflexive(Matrix<bool> &m) // M_r = M + I
-{
-    Matrix<bool> temp = m ^ 0; // 单位矩阵 I
-    Matrix<bool> result = m + temp;
-    return result;
-}
-
-// 对称闭包
-Matrix<bool> symmetric(Matrix<bool> &m) // M_s = M + M^T
-{
-    Matrix<bool> temp = m.transpose(); // 转置矩阵 M^T
-    Matrix<bool> result = m + temp;
-    return result;
-}
-*/
-
 // 传递闭包 Warshall 算法
-Matrix<bool> transitiveWarshall(Matrix<bool> &m) 
+Matrix<bool> transitiveWarshall(Matrix<bool> &m)
 {
     Matrix<bool> result = m;
     int n = m.getRows();
@@ -484,7 +436,7 @@ Matrix<bool> transitiveWarshall(Matrix<bool> &m)
             for (int j = 0; j < n; j++)
             {
                 // // 更新 result[i][j]，如果存在从 i 到 k 和从 k 到 j 的路径，则存在从 i 到 j 的路径
-                result.set(i, j, result.get(i, j) || (result.get(i, k) && result.get(k, j))); 
+                result.set(i, j, result.get(i, j) || (result.get(i, k) && result.get(k, j)));
             }
         }
     }
@@ -493,20 +445,119 @@ Matrix<bool> transitiveWarshall(Matrix<bool> &m)
 
 int main()
 {
-
     while (true)
     {
-        Matrix<bool> relationshipMatrix = readMatrix();
-        cout << "输入的关系矩阵为 : " << endl
-             << relationshipMatrix << endl;
-
-        cout << "传递闭包 (Warshall 算法) : " << endl;
-        Matrix<bool> transitiveClosureWarshall = transitiveWarshall(relationshipMatrix);
-        cout << transitiveClosureWarshall << endl;
-
-        if (!askToContinue())
+        cout << "请选择求解传递闭包的操作 : (1.集合形式; 2.关系矩阵形式)" << endl;
+        int choice;
+        while (true)
         {
-            break;
+            cin >> choice;
+            if (cin.fail() || choice != 1 && choice != 2)
+            {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "输入错误，请重新输入" << endl;
+            }
+            else
+            {
+                break;
+            }
+        }
+        if (choice == 1)
+        {
+            int numElements;
+            cout << "请输入集合 A 中元素个数: ";
+            while (true)
+            {
+                cin >> numElements;
+                if (cin.fail() || numElements <= 0)
+                {
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "请输入正整数！" << endl;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            vector<char> elements(numElements);
+            map<char, int> elementIndex;
+            cout << "请输入集合 A 中的各个元素: ";
+            for (int i = 0; i < numElements; ++i)
+            {
+                cin >> elements[i];
+                elementIndex[elements[i]] = i;
+            }
+
+            int numRelations;
+            cout << "请输入二元关系 R 中元素个数: ";
+            while (true)
+            {
+                cin >> numRelations;
+                if (cin.fail() || numRelations <= 0)
+                {
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "请输入正整数！" << endl;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            Matrix<bool> relationshipMatrix(numElements, numElements);
+            cout << "请依次输入二元关系 R 中的各个元素 (例如 a b 表示 <a, b>):" << endl;
+            for (int i = 0; i < numRelations; ++i)
+            {
+                char a, b;
+                cin >> a >> b;
+                relationshipMatrix.set(elementIndex[a], elementIndex[b], true);
+            }
+
+            Matrix<bool> transitiveClosureWarshall = transitiveWarshall(relationshipMatrix);
+
+            cout << "传递闭包 t(R) = { ";
+            bool first = true;
+            for (int i = 0; i < numElements; ++i)
+            {
+                for (int j = 0; j < numElements; ++j)
+                {
+                    if (transitiveClosureWarshall.get(i, j))
+                    {
+                        if (!first)
+                        {
+                            cout << ", ";
+                        }
+                        cout << "<" << elements[i] << ", " << elements[j] << ">";
+                        first = false;
+                    }
+                }
+            }
+            cout << " }" << endl;
+
+            if (!askToContinue())
+            {
+                break;
+            }
+        }
+        if (choice == 2)
+        {
+
+            Matrix<bool> relationshipMatrix = readMatrix();
+            cout << "输入的关系矩阵为 : " << endl
+                 << relationshipMatrix << endl;
+
+            cout << "传递闭包 (Warshall 算法) : " << endl;
+            Matrix<bool> transitiveClosureWarshall = transitiveWarshall(relationshipMatrix);
+            cout << transitiveClosureWarshall << endl;
+
+            if (!askToContinue())
+            {
+                break;
+            }
         }
     }
     return 0;
@@ -518,7 +569,7 @@ int main()
 0 1 1
 
 1 0 1
-0 0 1 
+0 0 1
 0 1 0
 
 1 0 1 1
