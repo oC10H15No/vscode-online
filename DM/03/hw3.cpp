@@ -390,10 +390,7 @@ Matrix<bool> readMatrix()
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "请输入正整数！" << endl;
         }
-        else
-        {
-            break;
-        }
+        else { break; }
     }
 
     int rows = n, cols = n;
