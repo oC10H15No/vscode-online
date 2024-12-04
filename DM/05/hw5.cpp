@@ -103,7 +103,7 @@ int main() {
     HuffmanNode* root = buildHuffmanTree(minHeap);
     cout << "霍夫曼编码: \n";
     printHuffmanCodes(root);
-    cout << total_cost << endl;
+    // cout << "总花销为：" << total_cost << endl;
     delete[] freq;
 
     return 0;
